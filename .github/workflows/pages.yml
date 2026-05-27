@@ -40,12 +40,10 @@ jobs:
       - name: SPA deep-link fallback
         run: cp apps/web/dist/index.html apps/web/dist/404.html
 
+      # Reads the existing Pages config. Pages must be enabled once in
+      # Settings -> Pages (Source: GitHub Actions); the default Actions token
+      # here cannot create the Pages site itself.
       - uses: actions/configure-pages@v5
-        # Attempt to enable Pages automatically. If this step fails with a
-        # permissions error, enable Pages once in Settings -> Pages
-        # (Source: GitHub Actions) and re-run.
-        with:
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
