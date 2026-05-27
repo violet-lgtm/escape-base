@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+  <defs>
+    <linearGradient id="wall2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d3c47"/>
+      <stop offset="1" stop-color="#18242c"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.5" cy="0.18" r="0.5">
+      <stop offset="0" stop-color="#ffd98a" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffd98a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="720" height="1280" fill="url(#wall2)"/>
+  <rect y="980" width="720" height="300" fill="#141d23"/>
+  <rect width="720" height="1280" fill="url(#lamp)"/>
+
+  <!-- hanging lamp -->
+  <line x1="360" y1="0" x2="360" y2="150" stroke="#0c141b" stroke-width="6"/>
+  <ellipse cx="360" cy="180" rx="70" ry="40" fill="#caa24a"/>
+  <ellipse cx="360" cy="186" rx="50" ry="22" fill="#ffe6a6"/>
+
+  <!-- framed paintings on the wall -->
+  <g>
+    <rect x="120" y="430" width="190" height="240" rx="6" fill="#0e171d" stroke="#5a4327" stroke-width="10"/>
+    <rect x="140" y="450" width="150" height="200" fill="#395a6f"/>
+    <circle cx="215" cy="520" r="34" fill="#cfe0ee" opacity="0.6"/>
+    <path d="M140 650 L200 560 L250 610 L290 540 L290 650 Z" fill="#22404f"/>
+  </g>
+  <g>
+    <rect x="420" y="470" width="170" height="160" rx="6" fill="#0e171d" stroke="#5a4327" stroke-width="10"/>
+    <rect x="438" y="488" width="134" height="124" fill="#4a5536"/>
+    <circle cx="505" cy="550" r="40" fill="#7d8a55"/>
+  </g>
+
+  <!-- back arrow marker, upper-left (hotspot: back) -->
+  <g opacity="0.9">
+    <circle cx="115" cy="170" r="44" fill="#0e171d" stroke="#3d566c" stroke-width="5"/>
+    <path d="M132 170 H100 M114 152 L96 170 L114 188" fill="none" stroke="#cfe0ee" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

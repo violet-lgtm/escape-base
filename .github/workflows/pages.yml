@@ -1,0 +1,60 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [claude/gifted-cray-WEv7y]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; let an in-progress run finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build web app
+        env:
+          PAGES_BASE: /escape-base/
+        run: pnpm --filter @escape/web build
+
+      - name: SPA deep-link fallback
+        run: cp apps/web/dist/index.html apps/web/dist/404.html
+
+      # Reads the existing Pages config. Pages must be enabled once in
+      # Settings -> Pages (Source: GitHub Actions); the default Actions token
+      # here cannot create the Pages site itself.
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
