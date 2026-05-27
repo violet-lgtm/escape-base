@@ -61,6 +61,24 @@ export async function loadState(gameId: string): Promise<GameState | null> {
   );
 }
 
+/** Wipe saved progress for a game from both the mirror and the stqry store. */
+export async function clearState(gameId: string): Promise<void> {
+  const key = stateKey(gameId);
+  try {
+    localStorage.removeItem(mirrorKey(key));
+  } catch {
+    // best-effort, same as writeMirror
+  }
+
+  const stqry = getStqry();
+  if (!stqry) return;
+
+  await withTimeout<void>(
+    (resolve) => stqry.storage.remove(key, () => resolve(), BUCKET),
+    () => undefined,
+  );
+}
+
 export async function saveState(gameId: string, state: GameState): Promise<void> {
   const key = stateKey(gameId);
   // Synchronous backstop first: always lands, even on an abrupt webview unload.

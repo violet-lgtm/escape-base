@@ -54,6 +54,32 @@ body {
   text-transform: capitalize;
 }
 
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Testing-only reset (shown via ?debug). pointer-events re-enabled since the
+   HUD itself is click-through. */
+.hud .reset {
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(204, 64, 64, 0.85);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.hud .reset:active {
+  opacity: 0.7;
+}
+
 .inventory {
   position: absolute;
   bottom: 0;

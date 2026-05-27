@@ -8,6 +8,7 @@ import {
   type GameState,
 } from '@escape/engine';
 import {
+  clearState,
   clusterOfRoom,
   loadState,
   navigateToRoom,
@@ -32,6 +33,10 @@ export function App() {
     const param = new URLSearchParams(window.location.search).get('cluster');
     return param ?? clusterOfRoom(game, game.startRoom)?.id ?? game.clusters[0]!.id;
   }, [game]);
+
+  // Testing-only: a reset affordance, shown only with ?debug in the URL so it
+  // never appears in the shipped product.
+  const debug = useMemo(() => new URLSearchParams(window.location.search).has('debug'), []);
 
   const [state, setState] = useState<GameState | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -98,6 +103,15 @@ export function App() {
     [state, runEffects],
   );
 
+  const onReset = useCallback(async () => {
+    await clearState(GAME_ID);
+    const fresh = freshState(game);
+    setState(fresh);
+    setRoomId(resolveEntryRoom(game, currentClusterId, fresh));
+    setMessage('');
+    setWon(false);
+  }, [game, currentClusterId]);
+
   const revision = useMemo(
     () => (state ? JSON.stringify([state.inventory, state.flags]) : ''),
     [state],
@@ -117,7 +131,14 @@ export function App() {
 
       <header className="hud">
         <span className="title">{game.title}</span>
-        <span className="room">{room.id}</span>
+        <span className="hud-right">
+          <span className="room">{room.id}</span>
+          {debug && (
+            <button className="reset" onClick={() => void onReset()}>
+              ↻ Reset
+            </button>
+          )}
+        </span>
       </header>
 
       <footer className="inventory">
