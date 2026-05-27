@@ -9,7 +9,7 @@ import {
   Rectangle,
   Sprite,
   Text,
-  type Texture,
+  Texture,
 } from 'pixi.js';
 import { OutlineFilter } from 'pixi-filters';
 import type { Hotspot, Room } from '@escape/schema';
@@ -27,6 +27,19 @@ interface PixiRoomProps {
 
 function toColor(background: string): number {
   return background.startsWith('#') ? Number.parseInt(background.slice(1), 16) : 0x101014;
+}
+
+/**
+ * Load any image URL — http(s), an SVG, or an uploaded `data:` URI — into a
+ * texture via a real <img>, sidestepping the asset loader's extension sniffing
+ * (which doesn't recognize data URIs).
+ */
+async function loadTexture(url: string): Promise<Texture> {
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = url;
+  await image.decode();
+  return Texture.from(image);
 }
 
 /**
@@ -101,7 +114,7 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
         [...new Set(room.hotspots.filter((h) => h.sprite).map((h) => assetUrl(h.sprite!)))].map(
           async (url) => {
             try {
-              spriteTextures.set(url, await Assets.load<Texture>(url));
+              spriteTextures.set(url, await loadTexture(url));
             } catch {
               // Missing art falls back to an invisible region below.
             }

@@ -68,6 +68,49 @@ export function Editor() {
     });
   }, [currentRoomId]);
 
+  // Upload an SVG/PNG → embed it as a self-contained data URL and drop in a
+  // clickable rect hotspot sized to the image's aspect ratio.
+  const uploadObject = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const sprite = String(reader.result);
+        const place = (aspect: number) => {
+          const w = 0.25;
+          // Keep the image's pixel aspect within the portrait 720x1280 canvas.
+          const h = Math.min(0.7, Math.max(0.05, (w * (720 / 1280)) / (aspect || 1)));
+          const label = file.name.replace(/\.[^.]+$/, '');
+          setGame((g) => {
+            const r = g.rooms.find((x) => x.id === currentRoomId);
+            if (!r) return g;
+            const id = uniqueId('object', new Set(r.hotspots.map((hs) => hs.id)));
+            const hotspot: Hotspot = {
+              id,
+              label,
+              sprite,
+              shape: { type: 'rect', x: (1 - w) / 2, y: (1 - h) / 2, w, h },
+              conditions: [],
+              actions: [{ type: 'showMessage', text: `You see the ${label}.` }],
+            };
+            setSelectedHotspotId(id);
+            return {
+              ...g,
+              rooms: g.rooms.map((x) =>
+                x.id === r.id ? { ...x, hotspots: [...x.hotspots, hotspot] } : x,
+              ),
+            };
+          });
+        };
+        const img = new Image();
+        img.onload = () => place(img.naturalWidth / img.naturalHeight);
+        img.onerror = () => place(1);
+        img.src = sprite;
+      };
+      reader.readAsDataURL(file);
+    },
+    [currentRoomId],
+  );
+
   const deleteHotspot = useCallback(
     (hotspotId: string) => {
       patchRoom(currentRoomId, { hotspots: room.hotspots.filter((h) => h.id !== hotspotId) });
@@ -154,6 +197,18 @@ export function Editor() {
         </select>
         <button onClick={addRoom}>+ Room</button>
         <button onClick={addHotspot}>+ Hotspot</button>
+        <label className="ed-import">
+          + Object
+          <input
+            type="file"
+            accept=".svg,.png,image/svg+xml,image/png"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) uploadObject(file);
+              e.target.value = '';
+            }}
+          />
+        </label>
         <span className="ed-spacer" />
         <button onClick={() => setTesting(true)}>▶ Test play</button>
         <button onClick={exportJson}>Export JSON</button>
