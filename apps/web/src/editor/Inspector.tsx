@@ -18,6 +18,8 @@ const ASSET_SUGGESTIONS = [
   'assets/vault.svg',
 ];
 
+const OBJECT_SUGGESTIONS = ['assets/key.svg', 'assets/coin.svg'];
+
 function defaultAction(type: Action['type']): Action {
   switch (type) {
     case 'addItem':
@@ -226,6 +228,21 @@ export function Inspector(props: InspectorProps) {
         <label className="ed-field">
           <span>Label</span>
           <input value={h.label ?? ''} onChange={(e) => patch({ label: e.target.value })} />
+        </label>
+
+        <label className="ed-field">
+          <span>Sprite (optional — a clickable object instead of a region)</span>
+          <input
+            list="ed-objects"
+            placeholder="assets/…"
+            value={h.sprite ?? ''}
+            onChange={(e) => patch({ sprite: e.target.value || undefined })}
+          />
+          <datalist id="ed-objects">
+            {OBJECT_SUGGESTIONS.map((a) => (
+              <option key={a} value={a} />
+            ))}
+          </datalist>
         </label>
 
         <div className="ed-section-head">

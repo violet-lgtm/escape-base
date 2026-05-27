@@ -94,6 +94,7 @@ export function RoomCanvas({ room, selectedId, onSelect, onChangeShape }: RoomCa
             }}
             onPointerDown={(e) => beginDrag(e, 'move', h.id, h.shape)}
           >
+            {h.sprite && <img className="ed-hotspot-img" src={assetUrl(h.sprite)} alt="" />}
             <span className="ed-hotspot-label">{h.label ?? h.id}</span>
             <span
               className="ed-handle"

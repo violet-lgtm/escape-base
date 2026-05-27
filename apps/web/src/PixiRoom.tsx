@@ -9,6 +9,7 @@ import {
   Text,
   type Texture,
 } from 'pixi.js';
+import { OutlineFilter } from 'pixi-filters';
 import type { Hotspot, Room } from '@escape/schema';
 import { assetUrl, isImageBackground } from './assets.js';
 
@@ -91,6 +92,37 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
           });
       }
 
+      // Preload object sprites so layout can place them synchronously.
+      const spriteTextures = new Map<string, Texture>();
+      await Promise.all(
+        [...new Set(room.hotspots.filter((h) => h.sprite).map((h) => assetUrl(h.sprite!)))].map(
+          async (url) => {
+            try {
+              spriteTextures.set(url, await Assets.load<Texture>(url));
+            } catch {
+              // Missing art falls back to an invisible region below.
+            }
+          },
+        ),
+      );
+      if (destroyed) return;
+
+      const makeLabel = (text: string, x: number, y: number): Text => {
+        const label = new Text({
+          text,
+          style: {
+            fill: 0xffffff,
+            fontSize: 15,
+            fontFamily: 'system-ui, sans-serif',
+            stroke: { color: 0x000000, width: 4 },
+          },
+        });
+        label.eventMode = 'none';
+        label.visible = false;
+        label.position.set(x, y);
+        return label;
+      };
+
       const layout = () => {
         layer.removeChildren();
         const { width, height } = instance.screen;
@@ -101,9 +133,39 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
           const w = hotspot.shape.w * width;
           const h = hotspot.shape.h * height;
 
-          // Point-and-click feel: the region is invisible but clickable; an
-          // outline + label appear only on hover (or briefly on tap), so the
-          // background art reads as the interactive object.
+          const texture = hotspot.sprite ? spriteTextures.get(assetUrl(hotspot.sprite)) : undefined;
+
+          if (texture) {
+            // Custom object: a real sprite, clickable by its bounds, that
+            // outlines its own silhouette on hover (and disappears when its
+            // conditions stop passing, since inactive hotspots are skipped).
+            const sprite = new Sprite(texture);
+            sprite.anchor.set(0.5);
+            const scale = Math.min(w / texture.width, h / texture.height);
+            sprite.scale.set(scale || 1);
+            sprite.position.set(x + w / 2, y + h / 2);
+            sprite.eventMode = 'static';
+            sprite.cursor = 'pointer';
+
+            const outline = new OutlineFilter({ thickness: 4, color: 0xffe6a6, quality: 0.2 });
+            const label = hotspot.label ? makeLabel(hotspot.label, x, Math.max(2, y - 22)) : null;
+
+            sprite.on('pointerover', () => {
+              sprite.filters = [outline];
+              if (label) label.visible = true;
+            });
+            sprite.on('pointerout', () => {
+              sprite.filters = [];
+              if (label) label.visible = false;
+            });
+            sprite.on('pointertap', () => onHotspotRef.current(hotspot));
+
+            layer.addChild(sprite);
+            if (label) layer.addChild(label);
+            continue;
+          }
+
+          // No sprite: invisible but clickable region with a box outline on hover.
           const node = new Container();
           node.eventMode = 'static';
           node.cursor = 'pointer';
@@ -118,22 +180,8 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
           highlight.visible = false;
           node.addChild(highlight);
 
-          let label: Text | null = null;
-          if (hotspot.label) {
-            label = new Text({
-              text: hotspot.label,
-              style: {
-                fill: 0xffffff,
-                fontSize: 15,
-                fontFamily: 'system-ui, sans-serif',
-                stroke: { color: 0x000000, width: 4 },
-              },
-            });
-            label.eventMode = 'none';
-            label.visible = false;
-            label.position.set(x + 6, Math.max(2, y - 22));
-            node.addChild(label);
-          }
+          const label = hotspot.label ? makeLabel(hotspot.label, x + 6, Math.max(2, y - 22)) : null;
+          if (label) node.addChild(label);
 
           const setHover = (on: boolean) => {
             highlight.visible = on;

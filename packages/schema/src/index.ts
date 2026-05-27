@@ -43,6 +43,12 @@ export const hotspotSchema = z.object({
   id: z.string(),
   label: z.string().optional(),
   shape: rectSchema,
+  /**
+   * Optional cut-out art (asset URL). When set, the hotspot renders as a real
+   * clickable object whose hover-outline traces its silhouette; `shape` then
+   * positions/sizes it. When omitted, the hotspot is an invisible region.
+   */
+  sprite: z.string().optional(),
   conditions: z.array(conditionSchema).default([]),
   actions: z.array(actionSchema).min(1),
 });

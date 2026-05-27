@@ -75,13 +75,14 @@ export const sampleGame: Game = parseGame({
       background: 'assets/cellar.svg',
       hotspots: [
         {
-          id: 'shelf',
-          label: 'Dusty shelf',
-          shape: { x: 0.62, y: 0.4, w: 0.3, h: 0.24 },
+          id: 'coin-pickup',
+          label: 'Gold coin',
+          shape: { x: 0.7, y: 0.46, w: 0.12, h: 0.07 },
+          sprite: 'assets/coin.svg',
           conditions: [{ type: 'notItem', item: 'coin' }],
           actions: [
             { type: 'addItem', item: 'coin' },
-            { type: 'showMessage', text: 'A gold coin glints in the dust.' },
+            { type: 'showMessage', text: 'You pocket the gold coin.' },
           ],
         },
         {

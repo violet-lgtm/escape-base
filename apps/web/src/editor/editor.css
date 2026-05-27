@@ -116,6 +116,15 @@
   background: rgba(255, 176, 46, 0.22);
 }
 
+.ed-hotspot-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .ed-hotspot-label {
   position: absolute;
   top: 2px;

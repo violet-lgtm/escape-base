@@ -13,6 +13,7 @@
     "@escape/engine": "workspace:*",
     "@escape/schema": "workspace:*",
     "@escape/storage": "workspace:*",
+    "pixi-filters": "^6.1.5",
     "pixi.js": "^8.6.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
