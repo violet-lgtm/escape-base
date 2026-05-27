@@ -1,5 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { Application, Assets, Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
+import {
+  Application,
+  Assets,
+  Container,
+  Graphics,
+  Rectangle,
+  Sprite,
+  Text,
+  type Texture,
+} from 'pixi.js';
 import type { Hotspot, Room } from '@escape/schema';
 import { assetUrl, isImageBackground } from './assets.js';
 
@@ -92,26 +101,49 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
           const w = hotspot.shape.w * width;
           const h = hotspot.shape.h * height;
 
-          const region = new Graphics();
-          region
-            .roundRect(x, y, w, h, 8)
-            .fill({ color: 0xffffff, alpha: 0.12 })
-            .stroke({ color: 0xffffff, width: 2, alpha: 0.45 });
-          region.eventMode = 'static';
-          region.cursor = 'pointer';
-          region.on('pointertap', () => onHotspotRef.current(hotspot));
-          layer.addChild(region);
+          // Point-and-click feel: the region is invisible but clickable; an
+          // outline + label appear only on hover (or briefly on tap), so the
+          // background art reads as the interactive object.
+          const node = new Container();
+          node.eventMode = 'static';
+          node.cursor = 'pointer';
+          node.hitArea = new Rectangle(x, y, w, h);
 
+          const highlight = new Graphics();
+          highlight
+            .roundRect(x, y, w, h, 10)
+            .fill({ color: 0xffffff, alpha: 0.08 })
+            .stroke({ color: 0xffe6a6, width: 3, alpha: 0.95 });
+          highlight.eventMode = 'none';
+          highlight.visible = false;
+          node.addChild(highlight);
+
+          let label: Text | null = null;
           if (hotspot.label) {
-            const label = new Text({
+            label = new Text({
               text: hotspot.label,
-              style: { fill: 0xffffff, fontSize: 15, fontFamily: 'system-ui, sans-serif' },
+              style: {
+                fill: 0xffffff,
+                fontSize: 15,
+                fontFamily: 'system-ui, sans-serif',
+                stroke: { color: 0x000000, width: 4 },
+              },
             });
             label.eventMode = 'none';
-            label.x = x + 8;
-            label.y = y + 8;
-            layer.addChild(label);
+            label.visible = false;
+            label.position.set(x + 6, Math.max(2, y - 22));
+            node.addChild(label);
           }
+
+          const setHover = (on: boolean) => {
+            highlight.visible = on;
+            if (label) label.visible = on;
+          };
+          node.on('pointerover', () => setHover(true));
+          node.on('pointerout', () => setHover(false));
+          node.on('pointertap', () => onHotspotRef.current(hotspot));
+
+          layer.addChild(node);
         }
       };
 
