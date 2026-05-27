@@ -31,18 +31,45 @@ export const actionSchema = z.discriminatedUnion('type', [
 export type Action = z.infer<typeof actionSchema>;
 
 /** Region coordinates are normalized 0..1 so they scale across phone sizes. */
-export const rectSchema = z.object({
-  x: z.number().min(0).max(1),
-  y: z.number().min(0).max(1),
-  w: z.number().min(0).max(1),
-  h: z.number().min(0).max(1),
+const unit = z.number().min(0).max(1);
+
+export const pointSchema = z.object({ x: unit, y: unit });
+export type Point = z.infer<typeof pointSchema>;
+
+export const rectShapeSchema = z.object({
+  type: z.literal('rect'),
+  x: unit,
+  y: unit,
+  w: unit,
+  h: unit,
 });
-export type Rect = z.infer<typeof rectSchema>;
+export const ellipseShapeSchema = z.object({
+  type: z.literal('ellipse'),
+  x: unit,
+  y: unit,
+  w: unit,
+  h: unit,
+});
+export const polygonShapeSchema = z.object({
+  type: z.literal('polygon'),
+  points: z.array(pointSchema).min(3),
+});
+
+/** A hotspot hit region: a box, an ellipse inscribed in a box, or a polygon. */
+export const shapeSchema = z.discriminatedUnion('type', [
+  rectShapeSchema,
+  ellipseShapeSchema,
+  polygonShapeSchema,
+]);
+export type Shape = z.infer<typeof shapeSchema>;
+export type RectShape = z.infer<typeof rectShapeSchema>;
+export type EllipseShape = z.infer<typeof ellipseShapeSchema>;
+export type PolygonShape = z.infer<typeof polygonShapeSchema>;
 
 export const hotspotSchema = z.object({
   id: z.string(),
   label: z.string().optional(),
-  shape: rectSchema,
+  shape: shapeSchema,
   /**
    * Optional cut-out art (asset URL). When set, the hotspot renders as a real
    * clickable object whose hover-outline traces its silhouette; `shape` then

@@ -34,7 +34,7 @@ export const sampleGame: Game = parseGame({
         {
           id: 'drawer',
           label: 'Drawer',
-          shape: { x: 0.08, y: 0.55, w: 0.26, h: 0.22 },
+          shape: { type: 'rect', x: 0.08, y: 0.55, w: 0.26, h: 0.22 },
           conditions: [{ type: 'notItem', item: 'key' }],
           actions: [
             { type: 'addItem', item: 'key' },
@@ -44,13 +44,13 @@ export const sampleGame: Game = parseGame({
         {
           id: 'to-overview',
           label: 'Look around',
-          shape: { x: 0.7, y: 0.1, w: 0.22, h: 0.16 },
+          shape: { type: 'rect', x: 0.7, y: 0.1, w: 0.22, h: 0.16 },
           actions: [{ type: 'goToRoom', room: 'overview' }],
         },
         {
           id: 'cellar-door',
           label: 'Cellar door',
-          shape: { x: 0.4, y: 0.3, w: 0.2, h: 0.45 },
+          shape: { type: 'rect', x: 0.4, y: 0.3, w: 0.2, h: 0.45 },
           conditions: [{ type: 'hasItem', item: 'key' }],
           actions: [{ type: 'goToRoom', room: 'cellar' }],
         },
@@ -64,7 +64,7 @@ export const sampleGame: Game = parseGame({
         {
           id: 'back-to-lobby',
           label: 'Back',
-          shape: { x: 0.06, y: 0.08, w: 0.2, h: 0.14 },
+          shape: { type: 'rect', x: 0.06, y: 0.08, w: 0.2, h: 0.14 },
           actions: [{ type: 'goToRoom', room: 'lobby' }],
         },
       ],
@@ -77,7 +77,7 @@ export const sampleGame: Game = parseGame({
         {
           id: 'coin-pickup',
           label: 'Gold coin',
-          shape: { x: 0.7, y: 0.46, w: 0.12, h: 0.07 },
+          shape: { type: 'rect', x: 0.7, y: 0.46, w: 0.12, h: 0.07 },
           sprite: 'assets/coin.svg',
           conditions: [{ type: 'notItem', item: 'coin' }],
           actions: [
@@ -88,7 +88,7 @@ export const sampleGame: Game = parseGame({
         {
           id: 'to-vault',
           label: 'Vault door',
-          shape: { x: 0.1, y: 0.3, w: 0.22, h: 0.45 },
+          shape: { type: 'rect', x: 0.1, y: 0.3, w: 0.22, h: 0.45 },
           actions: [{ type: 'goToRoom', room: 'vault' }],
         },
       ],
@@ -101,7 +101,16 @@ export const sampleGame: Game = parseGame({
         {
           id: 'chest',
           label: 'Locked chest',
-          shape: { x: 0.36, y: 0.45, w: 0.28, h: 0.28 },
+          shape: {
+            type: 'polygon',
+            points: [
+              { x: 0.37, y: 0.56 },
+              { x: 0.5, y: 0.5 },
+              { x: 0.63, y: 0.56 },
+              { x: 0.64, y: 0.73 },
+              { x: 0.36, y: 0.73 },
+            ],
+          },
           conditions: [{ type: 'hasItem', item: 'coin' }],
           actions: [
             { type: 'showMessage', text: 'The coin fits a slot. The chest clicks open!' },

@@ -1,4 +1,14 @@
-import type { Action, Condition, Game, Hotspot, Item, Room } from '@escape/schema';
+import type {
+  Action,
+  Condition,
+  Game,
+  Hotspot,
+  Item,
+  PolygonShape,
+  Room,
+  Shape,
+} from '@escape/schema';
+import { addPolygonPoint, convertShape, removePolygonPoint } from '../shapes.js';
 
 const ACTION_TYPES: Action['type'][] = [
   'showMessage',
@@ -244,6 +254,37 @@ export function Inspector(props: InspectorProps) {
             ))}
           </datalist>
         </label>
+
+        <label className="ed-field">
+          <span>Shape</span>
+          <select
+            value={h.shape.type}
+            onChange={(e) =>
+              patch({ shape: convertShape(h.shape, e.target.value as Shape['type']) })
+            }
+          >
+            <option value="rect">rectangle</option>
+            <option value="ellipse">ellipse</option>
+            <option value="polygon">polygon</option>
+          </select>
+        </label>
+        {h.shape.type === 'polygon' && (
+          <div className="ed-row">
+            <span className="ed-muted">
+              {h.shape.points.length} points — drag handles on canvas
+            </span>
+            <button onClick={() => patch({ shape: addPolygonPoint(h.shape as PolygonShape) })}>
+              + pt
+            </button>
+            <button
+              className="ed-x"
+              disabled={h.shape.points.length <= 3}
+              onClick={() => patch({ shape: removePolygonPoint(h.shape as PolygonShape) })}
+            >
+              − pt
+            </button>
+          </div>
+        )}
 
         <div className="ed-section-head">
           <h3>Conditions</h3>

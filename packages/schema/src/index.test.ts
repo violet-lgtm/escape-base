@@ -16,7 +16,7 @@ const valid: Game = {
       hotspots: [
         {
           id: 'door',
-          shape: { x: 0.1, y: 0.1, w: 0.2, h: 0.4 },
+          shape: { type: 'rect', x: 0.1, y: 0.1, w: 0.2, h: 0.4 },
           conditions: [{ type: 'hasItem', item: 'key' }],
           actions: [{ type: 'win' }],
         },
@@ -35,9 +35,36 @@ describe('gameSchema', () => {
     expect(game.items).toEqual([]);
   });
 
+  it('accepts ellipse and polygon hotspot shapes', () => {
+    const g = structuredClone(valid);
+    g.rooms[0]!.hotspots[0]!.shape = { type: 'ellipse', x: 0.1, y: 0.1, w: 0.3, h: 0.3 };
+    expect(() => parseGame(g)).not.toThrow();
+    g.rooms[0]!.hotspots[0]!.shape = {
+      type: 'polygon',
+      points: [
+        { x: 0.1, y: 0.1 },
+        { x: 0.4, y: 0.2 },
+        { x: 0.2, y: 0.5 },
+      ],
+    };
+    expect(() => parseGame(g)).not.toThrow();
+  });
+
+  it('rejects a polygon with fewer than three points', () => {
+    const bad = structuredClone(valid);
+    bad.rooms[0]!.hotspots[0]!.shape = {
+      type: 'polygon',
+      points: [
+        { x: 0.1, y: 0.1 },
+        { x: 0.4, y: 0.2 },
+      ],
+    };
+    expect(() => parseGame(bad)).toThrow();
+  });
+
   it('rejects out-of-range hotspot coordinates', () => {
     const bad = structuredClone(valid);
-    bad.rooms[0]!.hotspots[0]!.shape.x = 1.5;
+    bad.rooms[0]!.hotspots[0]!.shape = { type: 'rect', x: 1.5, y: 0.1, w: 0.2, h: 0.4 };
     expect(() => parseGame(bad)).toThrow();
   });
 

@@ -116,6 +116,44 @@
   background: rgba(255, 176, 46, 0.22);
 }
 
+.ed-hotspot.ellipse {
+  border-radius: 50%;
+}
+
+.ed-poly-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ed-poly {
+  pointer-events: auto;
+  cursor: move;
+  fill: rgba(45, 108, 223, 0.18);
+  stroke: rgba(45, 108, 223, 0.9);
+  stroke-width: 2;
+}
+
+.ed-poly.selected {
+  fill: rgba(255, 176, 46, 0.22);
+  stroke: #ffb02e;
+}
+
+.ed-vertex {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  background: #fff;
+  border: 2px solid #ffb02e;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+}
+
 .ed-hotspot-img {
   position: absolute;
   inset: 0;

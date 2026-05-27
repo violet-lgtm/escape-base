@@ -16,7 +16,7 @@ const base = (): GameState => freshState(game);
 
 const hotspot = (overrides: Partial<Hotspot>): Hotspot => ({
   id: 'h',
-  shape: { x: 0, y: 0, w: 0.1, h: 0.1 },
+  shape: { type: 'rect', x: 0, y: 0, w: 0.1, h: 0.1 },
   conditions: [],
   actions: [{ type: 'showMessage', text: 'hi' }],
   ...overrides,

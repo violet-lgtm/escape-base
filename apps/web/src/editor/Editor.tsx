@@ -54,7 +54,7 @@ export function Editor() {
       const hotspot: Hotspot = {
         id,
         label: 'New hotspot',
-        shape: { x: 0.4, y: 0.42, w: 0.2, h: 0.16 },
+        shape: { type: 'rect', x: 0.4, y: 0.42, w: 0.2, h: 0.16 },
         conditions: [],
         actions: [{ type: 'showMessage', text: 'Hello' }],
       };

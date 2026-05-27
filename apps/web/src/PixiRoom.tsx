@@ -3,7 +3,9 @@ import {
   Application,
   Assets,
   Container,
+  Ellipse,
   Graphics,
+  Polygon,
   Rectangle,
   Sprite,
   Text,
@@ -12,6 +14,7 @@ import {
 import { OutlineFilter } from 'pixi-filters';
 import type { Hotspot, Room } from '@escape/schema';
 import { assetUrl, isImageBackground } from './assets.js';
+import { shapeBounds } from './shapes.js';
 
 interface PixiRoomProps {
   room: Room;
@@ -128,10 +131,11 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
         const { width, height } = instance.screen;
         for (const hotspot of room.hotspots) {
           if (!isActiveRef.current(hotspot)) continue;
-          const x = hotspot.shape.x * width;
-          const y = hotspot.shape.y * height;
-          const w = hotspot.shape.w * width;
-          const h = hotspot.shape.h * height;
+          const b = shapeBounds(hotspot.shape);
+          const x = b.x * width;
+          const y = b.y * height;
+          const w = b.w * width;
+          const h = b.h * height;
 
           const texture = hotspot.sprite ? spriteTextures.get(assetUrl(hotspot.sprite)) : undefined;
 
@@ -165,15 +169,28 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
             continue;
           }
 
-          // No sprite: invisible but clickable region with a box outline on hover.
+          // No sprite: invisible but clickable region. The hit area and hover
+          // outline follow the hotspot's actual shape (box, ellipse, polygon).
           const node = new Container();
           node.eventMode = 'static';
           node.cursor = 'pointer';
-          node.hitArea = new Rectangle(x, y, w, h);
 
           const highlight = new Graphics();
+          const shape = hotspot.shape;
+          if (shape.type === 'ellipse') {
+            const cx = x + w / 2;
+            const cy = y + h / 2;
+            node.hitArea = new Ellipse(cx, cy, w / 2, h / 2);
+            highlight.ellipse(cx, cy, w / 2, h / 2);
+          } else if (shape.type === 'polygon') {
+            const flat = shape.points.flatMap((p) => [p.x * width, p.y * height]);
+            node.hitArea = new Polygon(flat);
+            highlight.poly(flat);
+          } else {
+            node.hitArea = new Rectangle(x, y, w, h);
+            highlight.roundRect(x, y, w, h, 10);
+          }
           highlight
-            .roundRect(x, y, w, h, 10)
             .fill({ color: 0xffffff, alpha: 0.08 })
             .stroke({ color: 0xffe6a6, width: 3, alpha: 0.95 });
           highlight.eventMode = 'none';
