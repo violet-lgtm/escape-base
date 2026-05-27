@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Application, Container, Graphics, Text } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
 import type { Hotspot, Room } from '@escape/schema';
+import { assetUrl, isImageBackground } from './assets.js';
 
 interface PixiRoomProps {
   room: Room;
@@ -54,6 +55,33 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
       const layer = new Container();
       instance.stage.addChild(layer);
 
+      // Load the room background art (if any) and cover-fit it behind the
+      // hotspots. Solid `#rrggbb` backgrounds already show via the app's
+      // clear color, so there is nothing to load for those.
+      let bg: Sprite | null = null;
+      const fitBackground = () => {
+        if (!bg) return;
+        const { width, height } = instance.screen;
+        const tw = bg.texture.width;
+        const th = bg.texture.height;
+        if (!tw || !th) return;
+        const scale = Math.max(width / tw, height / th);
+        bg.scale.set(scale);
+        bg.position.set((width - tw * scale) / 2, (height - th * scale) / 2);
+      };
+      if (isImageBackground(room.background)) {
+        void Assets.load<Texture>(assetUrl(room.background))
+          .then((texture) => {
+            if (destroyed || !app) return;
+            bg = new Sprite(texture);
+            instance.stage.addChildAt(bg, 0);
+            fitBackground();
+          })
+          .catch(() => {
+            // Leave the solid clear color as a graceful fallback.
+          });
+      }
+
       const layout = () => {
         layer.removeChildren();
         const { width, height } = instance.screen;
@@ -89,7 +117,10 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
 
       layoutRef.current = layout;
       layout();
-      instance.renderer.on('resize', layout);
+      instance.renderer.on('resize', () => {
+        fitBackground();
+        layout();
+      });
     })();
 
     return () => {

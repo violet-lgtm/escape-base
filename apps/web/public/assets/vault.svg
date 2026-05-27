@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+  <defs>
+    <linearGradient id="vwall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241c14"/>
+      <stop offset="1" stop-color="#0d0a06"/>
+    </linearGradient>
+    <radialGradient id="vspot" cx="0.5" cy="0.55" r="0.55">
+      <stop offset="0" stop-color="#caa24a" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#caa24a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="720" height="1280" fill="url(#vwall)"/>
+  <rect width="720" height="1280" fill="url(#vspot)"/>
+  <ellipse cx="360" cy="980" rx="220" ry="44" fill="#000" opacity="0.45"/>
+
+  <!-- treasure chest, center (hotspot: chest) -->
+  <g>
+    <rect x="259" y="690" width="202" height="244" rx="14" fill="#5a3c22" stroke="#2c1c10" stroke-width="8"/>
+    <path d="M259 720 Q360 600 461 720 L461 740 L259 740 Z" fill="#6e4a2a" stroke="#2c1c10" stroke-width="8"/>
+    <rect x="259" y="800" width="202" height="22" fill="#3a2614"/>
+    <rect x="320" y="760" width="80" height="120" rx="8" fill="#caa24a"/>
+    <circle cx="360" cy="812" r="16" fill="#3a2614"/>
+    <rect x="352" y="812" width="16" height="34" rx="4" fill="#3a2614"/>
+    <!-- metal bands -->
+    <rect x="300" y="690" width="14" height="244" fill="#3a2614" opacity="0.7"/>
+    <rect x="406" y="690" width="14" height="244" fill="#3a2614" opacity="0.7"/>
+  </g>
+
+  <!-- faint glints -->
+  <circle cx="300" cy="676" r="4" fill="#ffe6a6"/>
+  <circle cx="430" cy="700" r="3" fill="#ffe6a6"/>
+</svg>

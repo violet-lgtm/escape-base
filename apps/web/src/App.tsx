@@ -16,6 +16,7 @@ import {
 } from '@escape/storage';
 import { GAME_ID, sampleGame } from './sample-game.js';
 import { PixiRoom } from './PixiRoom.js';
+import { assetUrl } from './assets.js';
 
 /** No stqry bridge and no parent frame → a plain dev browser. */
 function isStandalone(): boolean {
@@ -123,11 +124,15 @@ export function App() {
         {state.inventory.length === 0 ? (
           <span className="empty">Inventory empty</span>
         ) : (
-          state.inventory.map((id) => (
-            <span key={id} className="item">
-              {game.items.find((i) => i.id === id)?.name ?? id}
-            </span>
-          ))
+          state.inventory.map((id) => {
+            const item = game.items.find((i) => i.id === id);
+            return (
+              <span key={id} className="item">
+                {item?.icon && <img className="item-icon" src={assetUrl(item.icon)} alt="" />}
+                {item?.name ?? id}
+              </span>
+            );
+          })
         )}
       </footer>
 

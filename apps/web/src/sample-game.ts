@@ -18,8 +18,8 @@ export const sampleGame: Game = parseGame({
   schemaVersion: 1,
   startRoom: 'lobby',
   items: [
-    { id: 'key', name: 'Rusty Key' },
-    { id: 'coin', name: 'Gold Coin' },
+    { id: 'key', name: 'Rusty Key', icon: 'assets/key.svg' },
+    { id: 'coin', name: 'Gold Coin', icon: 'assets/coin.svg' },
   ],
   clusters: [
     { id: 'hub', stqryId: 57959, entryUrl: '/c/hub', rooms: ['lobby', 'overview'] },
@@ -29,7 +29,7 @@ export const sampleGame: Game = parseGame({
     {
       id: 'lobby',
       clusterId: 'hub',
-      background: '#1d2b3a',
+      background: 'assets/lobby.svg',
       hotspots: [
         {
           id: 'drawer',
@@ -59,7 +59,7 @@ export const sampleGame: Game = parseGame({
     {
       id: 'overview',
       clusterId: 'hub',
-      background: '#24323f',
+      background: 'assets/overview.svg',
       hotspots: [
         {
           id: 'back-to-lobby',
@@ -72,7 +72,7 @@ export const sampleGame: Game = parseGame({
     {
       id: 'cellar',
       clusterId: 'cellar',
-      background: '#2a211a',
+      background: 'assets/cellar.svg',
       hotspots: [
         {
           id: 'shelf',
@@ -95,7 +95,7 @@ export const sampleGame: Game = parseGame({
     {
       id: 'vault',
       clusterId: 'cellar',
-      background: '#1a1410',
+      background: 'assets/vault.svg',
       hotspots: [
         {
           id: 'chest',

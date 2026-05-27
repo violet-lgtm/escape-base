@@ -72,11 +72,20 @@ body {
 }
 
 .inventory .item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 13px;
+}
+
+.inventory .item-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .toast {
