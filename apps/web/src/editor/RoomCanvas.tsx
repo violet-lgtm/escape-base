@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { EllipseShape, Point, RectShape, Room, Shape } from '@escape/schema';
 import { assetUrl, isImageBackground } from '../assets.js';
 import type { Box } from '../shapes.js';
@@ -33,6 +33,21 @@ type Drag =
 export function RoomCanvas({ room, selectedId, onSelect, onChangeShape }: RoomCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const drag = useRef<Drag | null>(null);
+
+  // Match the canvas aspect to the background image so the editor's 0..1 space
+  // equals image space — the same space the player maps hotspots through.
+  const [bgAspect, setBgAspect] = useState(720 / 1280);
+  useEffect(() => {
+    if (!isImageBackground(room.background)) {
+      setBgAspect(720 / 1280);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) setBgAspect(img.naturalWidth / img.naturalHeight);
+    };
+    img.src = assetUrl(room.background);
+  }, [room.background]);
 
   const start = (e: React.PointerEvent, d: Drag, id: string) => {
     e.preventDefault();
@@ -100,9 +115,12 @@ export function RoomCanvas({ room, selectedId, onSelect, onChangeShape }: RoomCa
     drag.current = null;
   };
 
-  const bgStyle = isImageBackground(room.background)
-    ? { backgroundImage: `url(${assetUrl(room.background)})` }
-    : { backgroundColor: room.background };
+  const bgStyle: React.CSSProperties = {
+    aspectRatio: String(bgAspect),
+    ...(isImageBackground(room.background)
+      ? { backgroundImage: `url(${assetUrl(room.background)})`, backgroundSize: 'cover' }
+      : { backgroundColor: room.background }),
+  };
 
   const selected = room.hotspots.find((h) => h.id === selectedId) ?? null;
 

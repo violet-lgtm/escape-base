@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import {
   Application,
-  Assets,
   Container,
   Ellipse,
   Graphics,
@@ -81,32 +80,45 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
       const layer = new Container();
       instance.stage.addChild(layer);
 
-      // Load the room background art (if any) and cover-fit it behind the
-      // hotspots. Solid `#rrggbb` backgrounds already show via the app's
-      // clear color, so there is nothing to load for those.
+      // Hotspots are authored in the background image's coordinate space. The
+      // image is cover-fit to the viewport, and hotspots map through the SAME
+      // transform, so they stay locked to the art on any screen aspect. For
+      // solid `#rrggbb` rooms with no image, image space == the viewport.
       let bg: Sprite | null = null;
+      let bgSize: { w: number; h: number } | null = null;
+
+      const imageRect = () => {
+        const { width, height } = instance.screen;
+        if (!bgSize) return { offX: 0, offY: 0, dispW: width, dispH: height };
+        const scale = Math.max(width / bgSize.w, height / bgSize.h);
+        const dispW = bgSize.w * scale;
+        const dispH = bgSize.h * scale;
+        return { offX: (width - dispW) / 2, offY: (height - dispH) / 2, dispW, dispH };
+      };
+
       const fitBackground = () => {
         if (!bg) return;
-        const { width, height } = instance.screen;
-        const tw = bg.texture.width;
-        const th = bg.texture.height;
-        if (!tw || !th) return;
-        const scale = Math.max(width / tw, height / th);
-        bg.scale.set(scale);
-        bg.position.set((width - tw * scale) / 2, (height - th * scale) / 2);
+        const { offX, offY, dispW, dispH } = imageRect();
+        bg.width = dispW;
+        bg.height = dispH;
+        bg.position.set(offX, offY);
       };
+
+      // Load the background first so its size is known before hotspot layout.
       if (isImageBackground(room.background)) {
-        void Assets.load<Texture>(assetUrl(room.background))
-          .then((texture) => {
-            if (destroyed || !app) return;
+        try {
+          const texture = await loadTexture(assetUrl(room.background));
+          if (!destroyed) {
             bg = new Sprite(texture);
+            bgSize = { w: texture.width, h: texture.height };
             instance.stage.addChildAt(bg, 0);
             fitBackground();
-          })
-          .catch(() => {
-            // Leave the solid clear color as a graceful fallback.
-          });
+          }
+        } catch {
+          // Leave the solid clear color as a graceful fallback.
+        }
       }
+      if (destroyed) return;
 
       // Preload object sprites so layout can place them synchronously.
       const spriteTextures = new Map<string, Texture>();
@@ -141,14 +153,16 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
 
       const layout = () => {
         layer.removeChildren();
-        const { width, height } = instance.screen;
+        const { offX, offY, dispW, dispH } = imageRect();
+        const projX = (nx: number) => offX + nx * dispW;
+        const projY = (ny: number) => offY + ny * dispH;
         for (const hotspot of room.hotspots) {
           if (!isActiveRef.current(hotspot)) continue;
           const b = shapeBounds(hotspot.shape);
-          const x = b.x * width;
-          const y = b.y * height;
-          const w = b.w * width;
-          const h = b.h * height;
+          const x = projX(b.x);
+          const y = projY(b.y);
+          const w = b.w * dispW;
+          const h = b.h * dispH;
 
           const texture = hotspot.sprite ? spriteTextures.get(assetUrl(hotspot.sprite)) : undefined;
 
@@ -196,7 +210,7 @@ export function PixiRoom({ room, isActive, onHotspot, revision }: PixiRoomProps)
             node.hitArea = new Ellipse(cx, cy, w / 2, h / 2);
             highlight.ellipse(cx, cy, w / 2, h / 2);
           } else if (shape.type === 'polygon') {
-            const flat = shape.points.flatMap((p) => [p.x * width, p.y * height]);
+            const flat = shape.points.flatMap((p) => [projX(p.x), projY(p.y)]);
             node.hitArea = new Polygon(flat);
             highlight.poly(flat);
           } else {
